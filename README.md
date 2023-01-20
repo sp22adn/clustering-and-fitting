@@ -75,3 +75,38 @@ labels = kmeans.labels_
 #finding the centers of the clusters
 cen = kmeans.cluster_centers_
 print(cen)
+import sklearn.metrics as skmet
+
+# calculate the silhoutte score
+print(skmet.silhouette_score(scaled_df_data_1a, labels))
+
+# plot using the labels to select colour
+plt.figure(figsize=(10.0, 10.0))
+
+for l in range(n_clust_1): # loop over the different labels
+  plt.scatter(scaled_df_data_1a[labels==l][df_data_1a_colnam[0]], scaled_df_data_1a[labels==l][df_data_1a_colnam[1]])
+
+# # show cluster centres
+for ix in range(n_clust_1):
+  xc, yc = cen[ix,:]
+  plt.plot(xc, yc, "dk", markersize=10)
+
+plt.xlabel(df_data_1a_colnam[0])
+plt.ylabel(df_data_1a_colnam[1])
+plt.title('Clusters for the years 1995 and 2012 for the indicator School enrollment, tertiary, female (% gross)')
+plt.show()
+
+"""From the clusters we can observe that there is an increase in female enrollment for schooling in almost all countries.
+# 2
+"""
+
+# selecting the data with the indicator Educational attainment, at least completed short-cycle tertiary, population 25+, total (%) (cumulative)
+df_data_2=df_data[df_data['Indicator Code']=='SE.TER.CUAT.ST.ZS']#'NY.ADJ.NNTY.PC.KD.ZG']#'PA.NUS.ATLS']#'SP.POP.GROW']  #CO2 emissions (kg per PPP $ of GDP)
+
+df_data_2.fillna(0,inplace=True)
+
+df_data_2a=pd.DataFrame()
+# creating clusters for the years 1995 and 2012.
+df_data_2a['1995']=df_data_2['1995'].copy()
+df_data_2a['2019']=df_data_2['2019'].copy()
+df_data_2a.reset_index(drop=True)
