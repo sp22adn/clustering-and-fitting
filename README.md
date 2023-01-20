@@ -199,3 +199,65 @@ plt.figure(figsize=(10.0, 10.0))
 
 for l in range(n_clust_4): # loop over the different labels
   plt.scatter(scaled_df_data_4a[labels==l][df_data_4a_colnam[0]], scaled_df_data_4a[labels==l][df_data_4a_colnam[1]])
+# curve fit
+ we choose a country - Albania from the cluster-1. The indicator is School enrollment, tertiary, female (% gross)
+"""
+
+import pandas as pd
+import scipy.optimize as opt
+import numpy as np
+import matplotlib.pyplot as plt
+# import errors as err
+
+df_1a=pd.DataFrame()
+df_ttt=df_data_1.T
+df_1a['Angola']=df_ttt.iloc[:,4] #4,5
+df_1a['Albania']=df_ttt.iloc[:,5]
+df_1a.reset_index(inplace = True)
+
+df_1aaa=df_1a.drop(df_1a.index[0:34])
+df_1aaa.reset_index(inplace = True)
+df_1aaa.drop(df_1aaa.index[30:33],inplace=True)
+# df_1aaa.reset_index(inplace = True)
+df_1aaa
+
+xa = np.asarray(df_1aaa['index']).ravel()
+ya = np.asarray(df_1aaa['Albania']).ravel()
+
+# xa = df_1aaa['index'].float()
+
+def exp_growth1(t, scale, growth):
+ f = scale * np.exp(growth * (t-1990))
+ return f
+
+popt, covar = opt.curve_fit(exp_growth1, xa,ya)
+# popt, covar = opt.curve_fit(exp_growth1, df_1aaa['index'],df_1aaa['Albania'])
+
+xa1=pd.to_numeric(xa)
+
+df_pop=pd.DataFrame()
+print("Fit parameter", popt)
+# use *popt to pass on the fit parameters
+df_pop["pop_exp"] = exp_growth1(xa1, *popt)
+df_pop['Pop']=df_1aaa['Albania']
+df_pop['date']=df_1aaa['index']
+plt.figure()
+plt.plot(df_pop["date"], df_pop["Pop"], label="data")
+plt.plot(df_pop["date"], df_pop["pop_exp"], label="fit")
+plt.legend()
+plt.title("First fit attempt")
+plt.xlabel("year")
+plt.ylabel("School enrollment, tertiary, female (% gross)")
+plt.show()
+print()
+
+popt = [10.18016664, 0.0743957]#[0.65,-0.12]#[0.48279853, -0.0596685] #100e8
+df_pop["pop_exp"] = exp_growth1(xa1,*popt)
+plt.figure()
+plt.plot(df_pop["date"], df_pop["Pop"], label="data")
+plt.plot(df_pop["date"], df_pop["pop_exp"], label="fit")
+plt.legend()
+plt.xlabel("year")
+plt.ylabel("School enrollment, tertiary, female (% gross)")
+plt.title("Improved start value")
+plt.show()
