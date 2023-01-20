@@ -154,3 +154,48 @@ plt.xlabel(df_data_2a_colnam[0])
 plt.ylabel(df_data_2a_colnam[1])
 plt.title('Clusters for the years 1995 and 2012 for the indicator-Educational attainment, at least completed short-cycle tertiary, population 25+, total (%) (cumulative)')
 plt.show()
+# selecting the data with the indicator Educational attainment, at least Bachelor's or equivalent, population 25+, female (%) (cumulative)
+df_data_4=df_data[df_data['Indicator Code']=='SE.TER.CUAT.BA.FE.ZS']#'SE.PRM.REPT.FE.ZS']#'SE.SEC.UNER.LO.FE.ZS']
+
+df_data_4.fillna(0,inplace=True)
+
+df_data_4a=pd.DataFrame()
+# creating clusters for the years 1995 and 2012.
+df_data_4a['1995']=df_data_4['1995'].copy()
+df_data_4a['2019']=df_data_4['2019'].copy()
+df_data_4a.reset_index(drop=True)
+
+from sklearn.preprocessing import StandardScaler
+df_data_4a_colnam=df_data_4a.columns.values.tolist()
+
+#create scaled DataFrame where each variable has mean of 0 and standard dev of 1
+scaled_df_data_4 = StandardScaler().fit_transform(df_data_4a.to_numpy())
+
+#creating the dataframe
+scaled_df_data_4=pd.DataFrame(scaled_df_data_4, columns=[df_data_4a_colnam])
+# changing the datatype
+scaled_df_data_4 = scaled_df_data_4.astype(float)
+
+n_clust_4=2
+kmeans=KMeans(n_clusters=n_clust_4,random_state=42)
+# running k means clustering
+kmeans=kmeans.fit(scaled_df_data_4)
+#creating a duplicate dataframe
+scaled_df_data_4a=scaled_df_data_4
+# creating cluster ids
+scaled_df_data_4a['clust_id']=kmeans.predict(scaled_df_data_4)
+
+# deterining the labels 
+labels = kmeans.labels_
+#finding the centers of the clusters
+cen = kmeans.cluster_centers_
+
+import sklearn.metrics as skmet
+# calculate the silhoutte score
+print(skmet.silhouette_score(scaled_df_data_4a, labels))
+
+# plot using the labels to select colour
+plt.figure(figsize=(10.0, 10.0))
+
+for l in range(n_clust_4): # loop over the different labels
+  plt.scatter(scaled_df_data_4a[labels==l][df_data_4a_colnam[0]], scaled_df_data_4a[labels==l][df_data_4a_colnam[1]])
