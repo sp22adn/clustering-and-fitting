@@ -110,3 +110,47 @@ df_data_2a=pd.DataFrame()
 df_data_2a['1995']=df_data_2['1995'].copy()
 df_data_2a['2019']=df_data_2['2019'].copy()
 df_data_2a.reset_index(drop=True)
+from sklearn.preprocessing import StandardScaler
+df_data_2a_colnam=df_data_2a.columns.values.tolist()
+
+#create scaled DataFrame where each variable has mean of 0 and standard dev of 1
+scaled_df_data_2 = StandardScaler().fit_transform(df_data_2a.to_numpy())
+
+#creating the dataframe
+scaled_df_data_2=pd.DataFrame(scaled_df_data_2, columns=[df_data_2a_colnam])
+# changing the datatype
+scaled_df_data_2 = scaled_df_data_2.astype(float)
+
+n_clust_2=3
+kmeans=KMeans(n_clusters=n_clust_2,random_state=42)
+# running k means clustering
+kmeans=kmeans.fit(scaled_df_data_2)
+#creating a duplicate dataframe
+scaled_df_data_2a=scaled_df_data_2
+# creating cluster ids
+scaled_df_data_2a['clust_id']=kmeans.predict(scaled_df_data_2)
+
+# deterining the labels 
+labels = kmeans.labels_
+#finding the centers of the clusters
+cen = kmeans.cluster_centers_
+
+import sklearn.metrics as skmet
+# calculate the silhoutte score
+print(skmet.silhouette_score(scaled_df_data_1a, labels))
+
+# plot using the labels to select colour
+plt.figure(figsize=(10.0, 10.0))
+
+for l in range(n_clust_2): # loop over the different labels
+  plt.scatter(scaled_df_data_2a[labels==l][df_data_2a_colnam[0]], scaled_df_data_2a[labels==l][df_data_2a_colnam[1]])
+
+# # show cluster centres
+for ix in range(n_clust_2):
+  xc, yc = cen[ix,:]
+  plt.plot(xc, yc, "dk", markersize=10)
+
+plt.xlabel(df_data_2a_colnam[0])
+plt.ylabel(df_data_2a_colnam[1])
+plt.title('Clusters for the years 1995 and 2012 for the indicator-Educational attainment, at least completed short-cycle tertiary, population 25+, total (%) (cumulative)')
+plt.show()
